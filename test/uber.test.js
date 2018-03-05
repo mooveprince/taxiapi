@@ -5,7 +5,7 @@ var LambdaTester = require( 'lambda-tester' );
 var uberApi = require( '../uber' ).getRate;
 
 describe('uberapi', function() {
-   it( 'test success', function() {
+ /*  it( 'test success', function() {
 		return LambdaTester( uberApi )
 			.event({"queryStringParameters": {
 				"start_latitude":"37.7752315",
@@ -106,6 +106,21 @@ describe('uberapi', function() {
 				expect(result.body.indexOf("SELECT")).to.equal(-1);
                 expect( result.body.length).to.be.above(0);
 			})
-	})
+	})	*/
+
+	it( 'test invalid scenario', function() {
+		return LambdaTester( uberApi )
+			.event({"queryStringParameters": {
+				"start_latitude":"34.2302115",
+				"start_longitude":"-118.5535753",
+				"end_latitude":"27.9834776",
+				"end_longitude":"-82.5370781"
+			}})
+			.expectResult((result ) => {
+				console.log(result.body )
+				expect(result.body.indexOf("errorDescription")).to.not.equal(-1); 
+				expect( result.body.length).to.be.above(0);
+            });
+	});
 })
 

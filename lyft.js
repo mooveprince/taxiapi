@@ -23,7 +23,7 @@ var filterHandler = function (inputObject, filterBy, callback) {
 
     if (filteredPrice.length == 1) {
       var parsedLyftOutput = {}
-      parsedOutputArray = filteredPrice.map (requiredRide => {
+      filteredPrice.map (requiredRide => {
         parsedLyftOutput.rideName = requiredRide.display_name
         parsedLyftOutput.distance = requiredRide.estimated_distance_miles;
         parsedLyftOutput.estimate = "$"+requiredRide.estimated_cost_cents_max/100;
@@ -36,7 +36,7 @@ var filterHandler = function (inputObject, filterBy, callback) {
 module.exports.getRate = (event, context, callback) => {
 
   var qp = event.queryStringParameters;
-  console.log ("Inside get Lyft Rate for given Address " + qp);
+  console.log ("Inside get Lyft Rate for given Address " + JSON.stringify(qp));
 
   var response = { 
     statusCode: 200,
@@ -67,11 +67,15 @@ module.exports.getRate = (event, context, callback) => {
   request (lyftRequestObj, function (error, res, body) {
     if (error) {
       console.log ("error occurred while making the call to Lyft API " + error)
-      response.statusCode = 102;
+      response.statusCode = 200;
       response.body = JSON.stringify({errorDescription: error});
       callback (null, response);      
-    } else if (res.statusCode == 200) {
-      if (qp.filter_by) {
+    } else if (res.statusCode == 200 ) {
+      if (JSON.parse(body).cost_estimates.length == 0) {
+        response.statusCode = 200;
+        response.body = JSON.stringify({errorDescription: "No service offered here"});;
+        callback (null, response);
+      } else if (qp.filter_by) {
         filterHandler (body, qp.filter_by, function (filteredResponse) {
           response.body = filteredResponse;
           callback (null, response);

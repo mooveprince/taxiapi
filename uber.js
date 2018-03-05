@@ -1,7 +1,7 @@
 var request = require('request');
 
 const baseUrl = "https://api.uber.com/v1.2/estimates/price?"
-const TOKEN_KEY = process.env.UBER_TOKEN_KEY;
+const TOKEN_KEY = process.env.UBER_TOKEN_KEY ;
 
 const uberMap = {
   "STANDARD" : "uberX",
@@ -23,7 +23,7 @@ var filterHandler = function (inputObject, filterBy, callback) {
 
     if (filteredPrice.length == 1) {
       var parsedUberOutput = {}
-      parsedOutputArray = filteredPrice.map (requiredRide => {
+      filteredPrice.map (requiredRide => {
         parsedUberOutput.rideName = requiredRide.display_name
         parsedUberOutput.distance = requiredRide.distance
         parsedUberOutput.estimate = requiredRide.estimate
@@ -83,7 +83,12 @@ module.exports.getRate = (event, context, callback) => {
     } else {
       console.log ("Expected status code 200. Actual Status code " + res.statusCode );
       response.statusCode = res.statusCode;
-      response.body = JSON.stringify({errorDescription: "Some error occurred"});     
+      console.log(JSON.stringify(res));
+      if (JSON.parse(body).message) {
+        response.body = JSON.stringify({errorDescription: JSON.parse(body).message});     
+      } else {
+        response.body = JSON.stringify({errorDescription: "Some error occurred"});     
+      }
       callback (null, response); 
     }
   })
